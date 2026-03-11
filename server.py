@@ -1,8 +1,13 @@
 from fastapi import FastAPI, UploadFile, File
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
+from retrival import RetirvalPhase
 import os
 from index import IndexingPhase  # your indexing file
+from pydantic import BaseModel
+
+class UserQuery(BaseModel):
+    query:str
 
 app = FastAPI()
 
@@ -41,3 +46,13 @@ async def receive_files(files: List[UploadFile] = File(...)):
         return {"success": True, "message": "Data successfully stored into Qdrant"}
     except Exception as e:
         return {"success": False, "error": str(e)}
+    
+
+
+@app.post("/retrieval/data")   # spelling fixed
+async def QueryFromUser(data: UserQuery):
+    try:
+        ans = RetirvalPhase(data.query)  # synchronous function
+        return {"success": True, "answer": ans}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
